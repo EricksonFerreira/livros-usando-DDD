@@ -51,7 +51,7 @@ class PdfReportAdapter implements ReportAdapterInterface
      * 
      * @param array $data
      * @param array $options
-     * @return \Barryvdh\DomPDF\PDF
+     * @return \Illuminate\Http\Response
      */
     public function generate(array $data, array $options = [])
     {
@@ -71,18 +71,18 @@ class PdfReportAdapter implements ReportAdapterInterface
         // Carregar a view e gerar o PDF
         $pdf = Pdf::loadView($view, $viewData);
         
-        // Se for para download, retorna a resposta de download
-        if (isset($options['download']) && $options['download']) {
-            $filename = $options['filename'] ?? 'relatorio-' . now()->format('Y-m-d-H-i-s') . '.pdf';
-            return $pdf->download($filename);
+        // Nome do arquivo
+        $filename = $options['filename'] ?? 'relatorio-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+        if(strpos($filename, '.pdf') === false) {
+            $filename .= '.pdf';
         }
         
         // Se for para visualização no navegador
         if (isset($options['stream']) && $options['stream']) {
-            return $pdf->stream($options['filename'] ?? 'relatorio.pdf');
+            return $pdf->stream($filename);
         }
         
-        // Retorna a instância do PDF para uso posterior
-        return $pdf;
+        // Por padrão, retorna para download
+        return $pdf->download($filename);
     }
 }
